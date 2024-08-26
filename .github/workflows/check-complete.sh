@@ -1,7 +1,12 @@
 #!/bin/bash
+
+# Exit immediately if a command exits with a non-zero status.
 set -e
 
-if grep -q _enter *.md; then
-  echo "Replace all text having _enter with your input"
+# Ensure the 'Reflections' section is filled in the README.md
+if grep -q '``' README.md; then
+  echo "Please replace the placeholders in the Reflections section."
   exit 1
 fi
+
+echo "README.md is complete!"
