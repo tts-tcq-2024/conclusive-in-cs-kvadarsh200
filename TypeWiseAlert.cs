@@ -66,7 +66,7 @@ public class TypewiseAlert
     public static void SendToController(BreachType breachType)
     {
         const ushort header = 0xfeed;
-        Console.WriteLine($"{header} : {breachType}\n");
+        Console.WriteLine("{0:x} : {1}\n", header, breachType); // Format header as hexadecimal
     }
 
     private static Dictionary<BreachType, string> breachMessages = new Dictionary<BreachType, string>
