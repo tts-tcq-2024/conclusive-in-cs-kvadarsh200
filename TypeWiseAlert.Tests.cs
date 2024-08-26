@@ -1,11 +1,8 @@
-// File: TypeWiseAlertTests.cs
 using System;
 using Xunit;
-using Moq;
 
 public class TypeWiseAlertTests
 {
-    // Edge Case Tests
     [Theory]
     [InlineData(TypewiseAlert.CoolingType.PASSIVE_COOLING, 0, TypewiseAlert.BreachType.NORMAL)]
     [InlineData(TypewiseAlert.CoolingType.PASSIVE_COOLING, 35, TypewiseAlert.BreachType.NORMAL)]
@@ -17,74 +14,54 @@ public class TypeWiseAlertTests
         Assert.Equal(expectedBreach, actualBreach);
     }
 
-    // Mock Tests for Controller Communication
-    [Fact]
-    public void SendToController_CorrectMessageSent()
-    {
-        // Capture the output sent to Console
-        using (var sw = new System.IO.StringWriter())
-        {
-            Console.SetOut(sw);
-            TypewiseAlert.SendToController(TypewiseAlert.BreachType.TOO_HIGH);
-
-            var result = sw.ToString().Trim();
-            Assert.Contains("0xfeed : TOO_HIGH", result);
-        }
-    }
-
     [Theory]
     [InlineData(TypewiseAlert.BreachType.TOO_LOW, "Hi, the temperature is too low")]
     [InlineData(TypewiseAlert.BreachType.TOO_HIGH, "Hi, the temperature is too high")]
     public void SendToEmailTests(TypewiseAlert.BreachType breachType, string expectedMessage)
     {
+        var result = CaptureConsoleOutput(() => TypewiseAlert.SendToEmail(breachType));
+        Assert.Contains(expectedMessage, result);
+    }
+
+    // Refactored Helper Method
+    private string CaptureConsoleOutput(Action action)
+    {
         using (var sw = new System.IO.StringWriter())
         {
             Console.SetOut(sw);
-            TypewiseAlert.SendToEmail(breachType);
-            var result = sw.ToString().Trim();
-            Assert.Contains(expectedMessage, result);
+            action();
+            return sw.ToString().Trim();
         }
     }
 
-    // Edge case where no action is needed for NORMAL breach type
     [Fact]
     public void SendToEmail_NormalBreach_NoEmailSent()
     {
-        using (var sw = new System.IO.StringWriter())
-        {
-            Console.SetOut(sw);
-            TypewiseAlert.SendToEmail(TypewiseAlert.BreachType.NORMAL);
-            var result = sw.ToString().Trim();
-            Assert.Empty(result); // No email should be sent for NORMAL breach
-        }
+        var result = CaptureConsoleOutput(() => TypewiseAlert.SendToEmail(TypewiseAlert.BreachType.NORMAL));
+        Assert.Empty(result); // No email should be sent for NORMAL breach
     }
 
-    // Mock Test for CheckAndAlert to ensure correct function flow
+    [Fact]
+    public void SendToController_CorrectMessageSent()
+    {
+        var result = CaptureConsoleOutput(() => TypewiseAlert.SendToController(TypewiseAlert.BreachType.TOO_HIGH));
+        Assert.Contains("0xfeed : TOO_HIGH", result);
+    }
+
     [Fact]
     public void CheckAndAlert_ToController_InvokesControllerCommunication()
     {
-        using (var sw = new System.IO.StringWriter())
-        {
-            Console.SetOut(sw);
-            var batteryChar = new TypewiseAlert.BatteryCharacter { CoolingType = TypewiseAlert.CoolingType.PASSIVE_COOLING, Brand = "BrandX" };
-            TypewiseAlert.CheckAndAlert(TypewiseAlert.AlertTarget.TO_CONTROLLER, batteryChar, 40);
-            
-            var result = sw.ToString().Trim();
-            Assert.Contains("0xfeed", result); // Ensure controller communication is invoked
-        }
+        var batteryChar = new TypewiseAlert.BatteryCharacter { CoolingType = TypewiseAlert.CoolingType.PASSIVE_COOLING, Brand = "BrandX" };
+        var result = CaptureConsoleOutput(() => TypewiseAlert.CheckAndAlert(TypewiseAlert.AlertTarget.TO_CONTROLLER, batteryChar, 40));
+        Assert.Contains("0xfeed", result); // Ensure controller communication is invoked
     }
 
     [Fact]
     public void CheckAndAlert_ToEmail_InvokesEmailCommunication()
     {
-        using (var sw = new System.IO.StringWriter())
-        {
-            Console.SetOut(sw);
-            var batteryChar = new TypewiseAlert.BatteryCharacter { CoolingType = TypewiseAlert.CoolingType.PASSIVE_COOLING, Brand = "BrandX" };
-            TypewiseAlert.CheckAndAlert(TypewiseAlert.AlertTarget.TO_EMAIL, batteryChar, 40);
-
-            var result = sw.ToString().Trim();
-            Assert.Contains("To: a.b@c.com", result); // Ensure email communication is invoked
-        }
+        var batteryChar = new TypewiseAlert.BatteryCharacter { CoolingType = TypewiseAlert.CoolingType.PASSIVE_COOLING, Brand = "BrandX" };
+        var result = CaptureConsoleOutput(() => TypewiseAlert.CheckAndAlert(TypewiseAlert.AlertTarget.TO_EMAIL, batteryChar, 40));
+        Assert.Contains("To: a.b@c.com", result); // Ensure email communication is invoked
     }
 }
+
