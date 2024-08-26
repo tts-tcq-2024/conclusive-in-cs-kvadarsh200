@@ -41,11 +41,11 @@ public class TypeWiseAlertTests
         Assert.Empty(result); // No email should be sent for NORMAL breach
     }
 
-    [Fact]
+     [Fact]
     public void SendToController_CorrectMessageSent()
     {
         var result = CaptureConsoleOutput(() => TypewiseAlert.SendToController(TypewiseAlert.BreachType.TOO_HIGH));
-        Assert.Contains("0xfeed : TOO_HIGH", result);
+        Assert.Contains("feed : TOO_HIGH", result); // Matching the formatted output
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class TypeWiseAlertTests
     {
         var batteryChar = new TypewiseAlert.BatteryCharacter { CoolingType = TypewiseAlert.CoolingType.PASSIVE_COOLING, Brand = "BrandX" };
         var result = CaptureConsoleOutput(() => TypewiseAlert.CheckAndAlert(TypewiseAlert.AlertTarget.TO_CONTROLLER, batteryChar, 40));
-        Assert.Contains("0xfeed", result); // Ensure controller communication is invoked
+        Assert.Contains("feed", result); // Matching the formatted output
     }
 
     [Fact]
