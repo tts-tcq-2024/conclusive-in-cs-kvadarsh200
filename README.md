@@ -20,9 +20,6 @@ The [GitHub Actions](https://docs.github.com/en/actions) in this project impleme
  
 As with any legacy, have a look at the code to understand it better.
  
-This project uses the
-[GTEST](https://google.github.io/googletest/)
-to test functionality.
  
 The 'Build and Run' workflow stores coverage-data as an artifact in the workflow run. You can download it from GitHub Actions.
  
